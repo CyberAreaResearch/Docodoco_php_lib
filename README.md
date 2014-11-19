@@ -4,3 +4,5 @@
 簡便に行う事が可能となります。このライブラリはPHP5を対象としています。
 
 どこどこv3対応。v4対応に修正を行う必要がある。
+
+http://www.docodoco.jp/z_tool/php_lib.html
