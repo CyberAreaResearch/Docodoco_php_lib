@@ -8,9 +8,10 @@
  * @copyright   2010 - Cyber Area Research,Inc.
  * @support     support@arearesearch.co.jp
  * @author      Daisuke Miura <daisuke@arearesearch.co.jp>
+ * @author      Tatsuya Tonooka <tatsuya@arearesearch.co.jp>
  * @package     DocodocoJP
- * @version     1.0.2
- * @last update 2011/08/24
+ * @version     1.0.4
+ * @last update 2013/05/09
  * @PHP version 5.2.x
  * @license     GNU Lesser General Public License (LGPL)
  */
@@ -166,10 +167,11 @@ class DocodocoJP {
      * 
      * 2010/09/02 リクエスト時にヘッダ送信追加
      * 2011/08/24 Refererの修正
+     * 2013/05/09 リクエストURLのバージョン変更
      */
     public function GetAttribute( $return = "" ) {
         if ( !$this->Config["DococoKey1"] || !$this->Config["DococoKey2"] ) {   return  FALSE;  }
-        $url    = "http://api.docodoco.jp/v3/search?key1=".$this->Config["DococoKey1"]."&key2=".$this->Config["DococoKey2"];
+        $url    = "http://api.docodoco.jp/v4/search?key1=".$this->Config["DococoKey1"]."&key2=".$this->Config["DococoKey2"];
         $referer= ( getenv( "HTTPS" ) ? "https://" : "http://" ).getenv( "HTTP_HOST" ).getenv( "REQUEST_URI" );
         if ( $this->Config["SearchIP"] ) {  $url .= "&ipadr=".$this->Config["SearchIP"];    }
         $opts   = array( "http" => array( "method" => "GET",
@@ -185,7 +187,7 @@ class DocodocoJP {
             return  FALSE;
         }
         else {
-            if ( is_object( $xml )) {
+            if (isset( $xml ) && is_object( $xml )) {
                 foreach ( $xml as $key => $value ) {
                     $this->{$key}   = mb_convert_encoding( (string)$value, $this->Config["CharSet"], "UTF-8" );
                 }
@@ -209,12 +211,17 @@ class DocodocoJP {
      * @access public
      * 
      * 2010/09/02 レスポンスが取れてない時の処理の修正
+     * 2013/05/09 どこどこJP Ver.4.0に対応.
      */
     public function GetArray() {
-        if ( $this->GetStatusCode()) {
+        if ( $this->GetStatusCode() ) {
             $tmp    = (array)$this;
-            $num    = array_search( "IP", array_keys( $tmp ));
-            return  ( $num == FALSE ) ? "" : array_slice( $tmp, $num );
+            foreach ( $tmp as $key => $value ) {
+                if ( strpos($key,"\0*\0") !== false ) {
+                    unset($tmp[$key]);
+                }
+            }
+            return $tmp;
         } else {
             $this->Status   = array( "code" => 500,"message" => "Internal Server Error（Does not execute the function）" );
         }
