@@ -1,8 +1,16 @@
-ã©ã“ã©ã“JP PHPãƒ©ã‚¤ãƒ–ãƒ©ãƒª
+‚Ç‚±‚Ç‚±JP PHPƒ‰ƒCƒuƒ‰ƒŠ
+===
+–{ƒNƒ‰ƒXƒ‰ƒCƒuƒ‰ƒŠ‚ðŽg—p‚·‚éŽ–‚ÅAPHPƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚É‚ÄA‚Ç‚±‚Ç‚±JP‚Ì”»’è’l‚É‘Î‚·‚éƒAƒNƒZƒX‚ð
+ŠÈ•Ö‚És‚¤‚½‚ß‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Å‚·B
 
-æœ¬ã‚¯ãƒ©ã‚¹ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’ä½¿ç”¨ã™ã‚‹äº‹ã§ã€PHPã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã«ã¦ã€ã©ã“ã©ã“JPã®åˆ¤å®šå€¤ã«å¯¾ã™ã‚‹ã‚¢ã‚¯ã‚»ã‚¹ã‚’
-ç°¡ä¾¿ã«è¡Œã†äº‹ãŒå¯èƒ½ã¨ãªã‚Šã¾ã™ã€‚ã“ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã¯PHP5ã‚’å¯¾è±¡ã¨ã—ã¦ã„ã¾ã™ã€‚
+—˜—p•û–@
+===
+Wikiƒy[ƒW‚ðŽQÆ‚µ‚Ä‚­‚¾‚³‚¢B
 
-ã©ã“ã©ã“v3å¯¾å¿œã€‚v4å¯¾å¿œã«ä¿®æ­£ã‚’è¡Œã†å¿…è¦ãŒã‚ã‚‹ã€‚
+‘O’ñðŒ
+===
+* PHP ˆÈã@iPHP 5.6.3 ‚Å“®ìŠm”F‚ð‚µ‚Ü‚µ‚½Bj
 
-http://www.docodoco.jp/z_tool/php_lib.html
+ƒ‰ƒCƒZƒ“ƒX
+===
+‚±‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Í[GNU Lesser General Public LicenseiLGPLj](http://www.gnu.org/copyleft/lesser.html "GNU Lesser General Public License")‚Ì‚à‚Æ‚ÅŒöŠJ‚µ‚Ü‚·B
