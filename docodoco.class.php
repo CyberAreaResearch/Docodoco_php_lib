@@ -5,14 +5,15 @@
  * File:        docodoco.class.php
  *
  * @link        http://www.docodoco.jp
- * @copyright   2010 - Cyber Area Research,Inc.
+ * @copyright   2015 - Cyber Area Research,Inc.
  * @support     support@arearesearch.co.jp
  * @author      Daisuke Miura <daisuke@arearesearch.co.jp>
  * @author      Tatsuya Tonooka <tatsuya@arearesearch.co.jp>
+ * @author      Takahiro Tomita <takahiro@arearesearch.co.jp>
  * @package     DocodocoJP
  * @version     1.0.4
- * @last update 2013/05/09
- * @PHP version 5.2.x
+ * @last update 2015/09/01
+ * @PHP version 5.6.x
  * @license     GNU Lesser General Public License (LGPL)
  */
 class DocodocoJP {
@@ -40,13 +41,11 @@ class DocodocoJP {
      *
      * @param string $key1 APIキー1
      * @param string $key2 APIキー2
-     * @param boolean $exe 自動実行 default:FALSE
+     * @param boolean $exe 自動実行 （default:FALSE）
      * @return object
      * @access public
-     *
-     * 2010/09/02 @param $exe の追加
      */
-    public function __construct ($key1 = "", $key2 = "", $exe = "") {
+    public function __construct ($key1 = "", $key2 = "", $exe = FALSE) {
         $this->Config = array(
                 "DococoKey1" => "",
                 "DococoKey2" => "",
@@ -55,9 +54,7 @@ class DocodocoJP {
         );
         $this->SetKey1($key1);
         $this->SetKey2($key2);
-        if (! is_bool($exe)) {
-            $autoexe = FALSE;
-        }
+        
         if ($exe && $this->Config["DococoKey1"] && $this->Config["DococoKey2"]) {
             $this->GetAttribute();
         }
@@ -177,7 +174,7 @@ class DocodocoJP {
      * どこどこJPの値取得
      *
      * @param string $return array 結果を連想配列で要求する
-     * @return mixed 成否/結果
+     * @return array（引数指定あり、取得成功） | TRUE（引数指定無し、取得成功） | FALSE（取得失敗）
      * @access public
      *
      * 2010/09/02 リクエスト時にヘッダ送信追加
@@ -185,11 +182,6 @@ class DocodocoJP {
      * 2013/05/09 リクエストURLのバージョン変更
      */
     public function GetAttribute ($return = "") {
-        if (! $this->Config["DococoKey1"] || ! $this->Config["DococoKey2"]) {
-            $this->Status = null;
-            return FALSE;
-        }
-        
         $url = "http://api.docodoco.jp/v4/search?key1=" . $this->Config["DococoKey1"] . "&key2=" . $this->Config["DococoKey2"];
         $referer = (getenv("HTTPS") ? "https://" : "http://") . getenv("HTTP_HOST") . getenv("REQUEST_URI");
         if ($this->Config["SearchIP"]) {
@@ -207,39 +199,68 @@ class DocodocoJP {
         $http_response_header = null;
         $res_fgc = @file_get_contents($url, false, $context);
         
-        list ($version, $status_code, $msg) = explode(' ', $http_response_header[0], 3);
-        switch ($status_code[0]) {
-            case '2':
-                $xml = simplexml_load_string($res_fgc);
-                if ($xml->status) { // REST APIエラー（APIキーの不備）
-                    $this->Status["code"] = (int) $xml->status;
-                    $this->Status["message"] = (string) $xml->message;
-                    return FALSE;
-                }
-                else {
+        if ($http_response_header !== null) { // $http_response_headerが取得出来た場合
+            list ($version, $status_code, $msg) = explode(' ', $http_response_header[0], 3);
+            switch ($status_code[0]) {
+                case '2':
+                    $xml = simplexml_load_string($res_fgc);
+                    if ($xml->status) { // REST APIエラー（APIキーの不備）
+                        $this->Status = array(
+                                "code" => (int) $xml->status,
+                                "message" => (string) $xml->message
+                        );
+                        
+                        $this->reset_property();
+                        return FALSE;
+                    }
+                    else {
+                        $this->Status = array(
+                                "code" => (int) $status_code,
+                                "message" => (string) $msg
+                        );
+                        
+                        foreach ($xml as $key => $value) {
+                            $this->$key = mb_convert_encoding((string) $value, $this->Config["CharSet"], "UTF-8");
+                        }
+                    }
+                    break;
+                case '3':
+                case '4':
+                case '5':
                     $this->Status = array(
                             "code" => (int) $status_code,
                             "message" => (string) $msg
                     );
                     
-                    foreach ($xml as $key => $value) {
-                        $this->{$key} = mb_convert_encoding((string) $value, $this->Config["CharSet"], "UTF-8");
-                    }
-                }
-                break;
-            case '3':
-            case '4':
-            case '5':
-                $this->Status = array(
-                        "code" => (int) $status_code,
-                        "message" => (string) $msg
-                );
-                break;
-            default:
-                break;
+                    $this->reset_property();
+                    return FALSE;
+                    break;
+            }
+        }
+        else {
+            $this->Status = array(
+                    "code" => null,
+                    "message" => 'Time-out or Not-domain'
+            );
+            
+            $this->reset_property();
+            return FALSE;
         }
         
         return ($return == "array") ? $this->GetArray() : TRUE;
+    }
+
+    /**
+     * プロパティ（どこどこJPの値を保持）の初期化
+     *
+     * @access private
+     */
+    private function reset_property () {
+        foreach (get_object_vars($this) as $property_name => $value) {
+            if ($property_name !== 'Config' && $property_name !== 'Status' && $property_name !== 'AddAgent') {
+                $this->$property_name = null;
+            }
+        }
     }
 
     /**
@@ -247,18 +268,16 @@ class DocodocoJP {
      *
      * @return array 判定結果
      * @access public
-     *
-     * 2010/09/02 レスポンスが取れてない時の処理の修正
-     * 2013/05/09 どこどこJP Ver.4.0に対応.
      */
     public function GetArray () {
         if ($this->GetStatusCode() === 200) {
-            $tmp = (array) $this;
-            foreach ($tmp as $key => $value) {
-                if (strpos($key, "\0*\0") !== false) {
-                    unset($tmp[$key]);
+            $tmp = [];
+            foreach (get_object_vars($this) as $property_name => $value) {
+                if ($property_name !== 'Config' && $property_name !== 'Status' && $property_name !== 'AddAgent') {
+                    $tmp[$property_name] = $value;
                 }
             }
+            
             return $tmp;
         }
         
